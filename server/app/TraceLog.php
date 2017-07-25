@@ -1,6 +1,9 @@
 <?php
 
-define('PKT_CODE_TRACE', 1);
+namespace App;
+
+use Serializable;
+use Closure;
 
 class TraceLog implements Serializable
 {
@@ -15,6 +18,8 @@ class TraceLog implements Serializable
     public $imports;
     public $exceptions;
     public $functions;
+
+    const PKT_CODE_TRACE = 1;
 
     public function __construct($fname)
     {
@@ -76,7 +81,7 @@ class TraceLog implements Serializable
                 $data = unpack('Lcode/Qts/Lthread', $data);
             } else break;
 
-            if ($data['code'] == PKT_CODE_TRACE) {
+            if ($data['code'] == self::PKT_CODE_TRACE) {
                 $n++;
 
                 $header = array_merge($data, unpack('Lsize', fread($fp, 4)));
@@ -209,49 +214,5 @@ class TraceLog implements Serializable
         $this->exceptions = &$this->data->exceptions;
         $this->functions = &$this->data->functions;
         $this->name = &$this->data->name;
-    }
-
-    public static function main($argv)
-    {
-        if (count($argv) <= 1) {
-            fprintf(STDERR, "Syntax: %s <file.log.info>\n", $argv[0]);
-            return false;
-        }
-
-        $trace_log = new TraceLog($argv[1]);
-        $trace_log->parseInfo();
-        $trace_log->parseFunc();
-
-        return $trace_log;
-    }
-}
-
-if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
-    $trace_log = TraceLog::main($argv);
-
-    $trace_log2 = unserialize( serialize($trace_log) );
-    unset($trace_log);
-
-    for ($i=1; $i<=$trace_log2->getLogCount(); $i++) {
-        $trace_log2->parseLog($i, 0, function($header, $raw_data) use ($trace_log2) {
-            fprintf(STDERR, "%d.", $header['pkt_no']);
-
-            $data = unpack('V*', $raw_data);
-            foreach($data as $block_id) {
-                if (isset($trace_log2->functions[$block_id])) {
-                    $func = $trace_log2->functions[$block_id];
-                    echo $func['function_name'].PHP_EOL;
-                }
-                if (isset($trace_log2->blocks[$block_id])) {
-                    $block = $trace_log2->blocks[$block_id];
-                    echo "\t".dechex($block_id).PHP_EOL;
-                } else if (isset($trace_log2->symbols[$block_id])) {
-                    $sym = $trace_log2->symbols[$block_id];
-                    echo "\t\t".dechex($block_id)." ".$sym['symbol_name'].PHP_EOL;
-                } else {
-                    echo sprintf("Unknown: 0x%08x\n", $block_id);
-                }
-            }
-        });
     }
 }

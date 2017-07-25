@@ -1,5 +1,9 @@
 <?php
 
+namespace App;
+
+use Serializable;
+
 class PeParser implements Serializable
 {
     private $data;
@@ -463,34 +467,4 @@ class PeParser implements Serializable
 
         return $output;
     }
-
-    public static function main($argv)
-    {
-        if (count($argv) <= 1) {
-            echo "Syntax: $argv[0] <file.exe>\n";
-            return false;
-        }
-
-        $fname = $argv[1];
-        if (preg_match('/^(.+\.(exe|dll))$/', $fname, $matches)) {
-            $fname = $matches[1];
-        } else {
-            echo "Error: file name not match <file.exe>\n";
-            return false;
-        }
-
-        $pe_parser = new PeParser($fname);
-
-        $pe_parser->parsePe();
-
-        return $pe_parser;
-    }
-}
-
-if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
-    $pe_parser = PeParser::main($argv);
-
-    $pe_parser2 = unserialize( serialize($pe_parser) );
-
-    echo $pe_parser2;
 }
