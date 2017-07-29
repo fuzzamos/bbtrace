@@ -1,6 +1,6 @@
 # Running
 
-$ node_modules/.bin/webpack -d
+$ node_modules/.bin/webpack -d -w
 $ php -S localhost:3000 -t public
 
 # Lumen PHP Framework
