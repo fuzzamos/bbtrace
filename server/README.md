@@ -3,6 +3,12 @@
 $ node_modules/.bin/webpack -d -w
 $ php -S localhost:3000 -t public
 
+# Notes
+
+```
+select hex(subroutines.addr), subroutines.name, subroutines.id, (select GROUP_CONCAT(id SEPARATOR ',') from graph_nodes where graph_nodes.subroutine_id = subroutines.id)  from subroutines order by subroutines.id
+```
+
 # Lumen PHP Framework
 
 [![Build Status](https://travis-ci.org/laravel/lumen-framework.svg)](https://travis-ci.org/laravel/lumen-framework)
